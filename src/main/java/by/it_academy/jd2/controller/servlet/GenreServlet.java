@@ -33,10 +33,14 @@ public class GenreServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String janre = req.getParameter(PARAMETER_GENRE);
+        String genre = req.getParameter(PARAMETER_GENRE);
 
         try {
-            genreService.create(janre);
+            if(genre.isBlank()) {
+                throw new IllegalArgumentException();
+            }
+
+            genreService.create(genre);
             req.setAttribute(ATTRIBUTE_ADD_GENRE, "Жанр добавлен в систему");
             doGet(req, resp);
         } catch (IllegalArgumentException e) {

@@ -35,6 +35,9 @@ public class ArtistServlet extends HttpServlet {
         String artist = req.getParameter(PARAMETER_ARTIST);
 
         try {
+            if(artist.isBlank()) {
+                throw new IllegalArgumentException();
+            }
             Long id = singerService.create(artist);
             req.setAttribute(ATTRIBUTE_ADD_ARTIST, "Исполнитель добавлен в систему под id = " + id);
             doGet(req, resp);

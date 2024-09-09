@@ -18,8 +18,6 @@ public final class ConnectionManager {
 
     private static DataSource dataSource;
 
-    private ConnectionManager() {}
-
     static {
         load();
     }
