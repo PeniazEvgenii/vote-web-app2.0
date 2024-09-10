@@ -41,4 +41,30 @@
         </c:if>
     </form>
 
+    <h3><fmt:message key="page.artist.delete.header"/></h3>
+
+    <form action="${pageContext.request.contextPath}/service/artist" method="post">
+        <h4><fmt:message key="page.artist.delete.choice"/></h4>
+
+        <select name = "deleteArtist" id = "delete">
+            <c:forEach var="artist" items = "${requestScope.artist}">
+                <option value = ${artist.key}>${artist.value}</option>
+            </c:forEach>
+         </select>
+        <br><br>
+        <button type="submit"><fmt:message key="page.artist.delete.button" /></button>
+        <br><br>
+
+        <c:if test="${not empty requestScope.deleteArtistErr}">
+            <div style="color: #FF0000">
+            <span>${requestScope.deleteArtistErr}</span>
+            </div>
+        </c:if>
+        <c:if test="${not empty requestScope.deleteArtist}">
+            <div style="color: #228B22">
+            <span>${requestScope.deleteArtist}</span>
+            </div>
+        </c:if>
+    </form>
+
 </body>
