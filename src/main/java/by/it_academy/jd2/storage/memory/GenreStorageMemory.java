@@ -1,5 +1,6 @@
 package by.it_academy.jd2.storage.memory;
 
+import by.it_academy.jd2.entity.Artist;
 import by.it_academy.jd2.entity.Genre;
 import by.it_academy.jd2.entity.econst.EJanres;
 import by.it_academy.jd2.storage.api.IStorage;
@@ -36,5 +37,10 @@ public class GenreStorageMemory implements IStorage<Genre> {
     @Override
     public Map<Long, Genre> getAll() {
         return this.data;
+    }
+
+    public boolean delete(Long id) {
+        Genre remove = data.remove(id);
+        return remove != null;
     }
 }

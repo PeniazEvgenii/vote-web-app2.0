@@ -17,6 +17,10 @@ public class ArtistStorageDB implements IStorage<Artist> {
     private static final String SQL_GET_ARTIST = "SELECT name FROM app.artist WHERE id = ?";
     private static final String SQL_GET_ALL_ARTIST = "SELECT id, name FROM app.artist";
 
+    private static final String SQL_DELETE_ARTIST = "DELETE FROM app.artist WHERE id = ?";
+    private static final String SQL_UPDATE_ARTIST_IN_VOTE = "UPDATE app.vote SET artist_id = null WHERE artist_id = ?";
+
+
     public ArtistStorageDB() {
     }
 
@@ -70,6 +74,45 @@ public class ArtistStorageDB implements IStorage<Artist> {
             return result;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public boolean delete(Long id) throws SQLException {
+        Connection connection = null;
+        PreparedStatement prepareStatement = null;
+        PreparedStatement prepareStatementVote = null;
+
+        try {
+            connection = ConnectionManager.open();
+            prepareStatement = connection.prepareStatement(SQL_DELETE_ARTIST);
+            prepareStatementVote = connection.prepareStatement(SQL_UPDATE_ARTIST_IN_VOTE);
+
+            connection.setAutoCommit(false);
+
+            prepareStatementVote.setLong(1, id);
+            prepareStatementVote.executeUpdate();
+
+            prepareStatement.setLong(1, id);
+            prepareStatement.executeUpdate();
+
+            connection.commit();
+            return true;
+        } catch (Exception e) {
+            if(connection != null) {
+                connection.rollback();
+            }
+            return false;
+            //throw new SQLException(e);
+        } finally {
+            if(connection != null) {
+                connection.close();
+            }
+            if(prepareStatement != null) {
+                prepareStatement.close();
+            }
+            if (prepareStatementVote != null) {
+                prepareStatementVote.close();
+            }
         }
     }
 

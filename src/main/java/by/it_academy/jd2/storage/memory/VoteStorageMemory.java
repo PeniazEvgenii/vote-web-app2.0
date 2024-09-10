@@ -1,5 +1,6 @@
 package by.it_academy.jd2.storage.memory;
 
+import by.it_academy.jd2.entity.Artist;
 import by.it_academy.jd2.entity.VoteEntity;
 import by.it_academy.jd2.storage.api.IStorage;
 
@@ -32,6 +33,11 @@ public class VoteStorageMemory implements IStorage<VoteEntity> {
 
     private long getNextIdFromMap() {
         return data.size() + 1;
+    }
+
+    public boolean delete(Long id) {
+        VoteEntity remove = data.remove(id);
+        return remove != null;
     }
 
 }

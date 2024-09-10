@@ -30,6 +30,11 @@ public class ArtistStorageMemory implements IStorage<Artist> {
         return data.get(id);
     }
 
+    public boolean delete(Long id) {
+        Artist remove = data.remove(id);
+        return remove != null;
+    }
+
     @Override
     public Map<Long, Artist> getAll() {
         return this.data;

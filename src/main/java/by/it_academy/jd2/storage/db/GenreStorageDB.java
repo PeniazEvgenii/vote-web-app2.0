@@ -12,6 +12,8 @@ public class GenreStorageDB implements IStorage<Genre> {
     private static final String SQL_INSERT_GENRE = "INSERT INTO app.genre (name) VALUES (?)";
     private static final String SQL_GET_GENRE = "SELECT name FROM app.genre WHERE id = ?";
     private static final String SQL_GET_ALL_GENRE = "SELECT id, name FROM app.genre";
+    private static final String SQL_DELETE_GENRE = "DELETE FROM app.genre WHERE id = ?";
+    private static final String SQL_DELETE_GENRE_IN_CROSS = "DELETE FROM app.cross_vote_genre WHERE genre_id = ?";
 
     public GenreStorageDB() {
     }
@@ -43,9 +45,8 @@ public class GenreStorageDB implements IStorage<Genre> {
             preparedStatement.setLong(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if(resultSet.next()) {
-                genre = new Genre();
-                genre.setId(id);
-                genre.setName(resultSet.getString("name"));
+                genre = new Genre(id,
+                        resultSet.getString("name"));
             }
             return genre;
         } catch (SQLException e) {
@@ -68,6 +69,45 @@ public class GenreStorageDB implements IStorage<Genre> {
             return result;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public boolean delete(Long id) throws SQLException {
+        Connection connection = null;
+        PreparedStatement prepareStatement = null;
+        PreparedStatement prepareStatementCross = null;
+
+        try {
+            connection = ConnectionManager.open();
+            prepareStatement = connection.prepareStatement(SQL_DELETE_GENRE);
+            prepareStatementCross = connection.prepareStatement(SQL_DELETE_GENRE_IN_CROSS);
+
+            connection.setAutoCommit(false);
+
+            prepareStatementCross.setLong(1, id);
+            prepareStatementCross.executeUpdate();
+
+            prepareStatement.setLong(1, id);
+            prepareStatement.executeUpdate();
+
+            connection.commit();
+            return true;
+        } catch (Exception e) {
+            if(connection != null) {
+                connection.rollback();
+            }
+            return false;
+            //throw new SQLException(e);
+        } finally {
+            if(connection != null) {
+                connection.close();
+            }
+            if(prepareStatement != null) {
+                prepareStatement.close();
+            }
+            if (prepareStatementCross != null) {
+                prepareStatementCross.close();
+            }
         }
     }
 
