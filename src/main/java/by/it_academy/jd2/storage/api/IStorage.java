@@ -1,5 +1,6 @@
 package by.it_academy.jd2.storage.api;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 public interface IStorage<T> {
@@ -9,4 +10,6 @@ public interface IStorage<T> {
     T get(Long id);
 
     Map<Long, T> getAll();
+
+    boolean delete(Long id)  throws SQLException;
 }
