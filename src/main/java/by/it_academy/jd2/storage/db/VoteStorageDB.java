@@ -67,10 +67,11 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
 
             VoteEntity voteEntity = null;
             if (resultSet.next()) {
-               voteEntity = buildVoteEntity(resultSet);
+                voteEntity = buildVoteEntity(resultSet);
             }
 
-            List<Long> genresByVoice = getGenresByVote(voteEntity.getId(), connection);;
+            List<Long> genresByVoice = getGenresByVote(voteEntity.getId(), connection);
+            ;
             voteEntity.setGenresId(genresByVoice);
 
             return voteEntity;
@@ -102,7 +103,7 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
     public Map<Long, VoteEntity> getAll() {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_VOTE_SQL)
-             ) {
+        ) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -125,7 +126,7 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
 
     private List<Long> getListGenres(ResultSet resultSet) throws SQLException {
         List<Long> genreId = new ArrayList<>();
-        while(resultSet.next()) {
+        while (resultSet.next()) {
             genreId.add(resultSet.getLong("genre_id"));
         }
         return genreId;
@@ -140,42 +141,30 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
                 .build();
     }
 
+    @Override
     public boolean delete(Long id) throws SQLException {
-        Connection connection = null;
-        PreparedStatement prepareStatement = null;
-        PreparedStatement prepareStatementCross = null;
-
-        try {
-            connection = ConnectionManager.open();
-            prepareStatement = connection.prepareStatement(SQL_DELETE_VOTE);
-            prepareStatementCross = connection.prepareStatement(SQL_DELETE_VOTE_IN_CROSS);
-
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement prepareStatement = connection.prepareStatement(SQL_DELETE_VOTE);
+             PreparedStatement prepareStatementCross = connection.prepareStatement(SQL_DELETE_VOTE_IN_CROSS)
+        ) {
             connection.setAutoCommit(false);
 
-            prepareStatementCross.setLong(1, id);
-            prepareStatementCross.executeUpdate();
+            try {
+                prepareStatementCross.setLong(1, id);
+                prepareStatementCross.executeUpdate();
 
-            prepareStatement.setLong(1, id);
-            prepareStatement.executeUpdate();
+                prepareStatement.setLong(1, id);
+                prepareStatement.executeUpdate();
 
-            connection.commit();
-            return true;
-        } catch (Exception e) {
-            if(connection != null) {
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
                 connection.rollback();
+                return false;
             }
-            return false;
-            //throw new SQLException(e);
-        } finally {
-            if(connection != null) {
-                connection.close();
-            }
-            if(prepareStatement != null) {
-                prepareStatement.close();
-            }
-            if (prepareStatementCross != null) {
-                prepareStatementCross.close();
-            }
+
+        } catch (SQLException e) {
+            throw new SQLException("Ошибка при удалении из базы данных", e);
         }
     }
 

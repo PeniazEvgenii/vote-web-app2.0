@@ -21,13 +21,13 @@ public class GenreStorageDB implements IStorage<Genre> {
     @Override
     public Long create(Genre genre) {
         try (Connection connection = ConnectionManager.open();
-                PreparedStatement preparedStatement = connection.prepareStatement(SQL_INSERT_GENRE, Statement.RETURN_GENERATED_KEYS)
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_INSERT_GENRE, Statement.RETURN_GENERATED_KEYS)
         ) {
             preparedStatement.setString(1, genre.getName());
             preparedStatement.executeUpdate();
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             Long id = null;
-            if(generatedKeys.next()) {
+            if (generatedKeys.next()) {
                 id = generatedKeys.getLong("id");
             }
             return id;
@@ -44,7 +44,7 @@ public class GenreStorageDB implements IStorage<Genre> {
             Genre genre = null;
             preparedStatement.setLong(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 genre = new Genre(id,
                         resultSet.getString("name"));
             }
@@ -72,42 +72,30 @@ public class GenreStorageDB implements IStorage<Genre> {
         }
     }
 
+    @Override
     public boolean delete(Long id) throws SQLException {
-        Connection connection = null;
-        PreparedStatement prepareStatement = null;
-        PreparedStatement prepareStatementCross = null;
-
-        try {
-            connection = ConnectionManager.open();
-            prepareStatement = connection.prepareStatement(SQL_DELETE_GENRE);
-            prepareStatementCross = connection.prepareStatement(SQL_DELETE_GENRE_IN_CROSS);
-
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement prepareStatement = connection.prepareStatement(SQL_DELETE_GENRE);
+             PreparedStatement prepareStatementCross = connection.prepareStatement(SQL_DELETE_GENRE_IN_CROSS)
+        ) {
             connection.setAutoCommit(false);
 
-            prepareStatementCross.setLong(1, id);
-            prepareStatementCross.executeUpdate();
+            try {
+                prepareStatementCross.setLong(1, id);
+                prepareStatementCross.executeUpdate();
 
-            prepareStatement.setLong(1, id);
-            prepareStatement.executeUpdate();
+                prepareStatement.setLong(1, id);
+                prepareStatement.executeUpdate();
 
-            connection.commit();
-            return true;
-        } catch (Exception e) {
-            if(connection != null) {
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
                 connection.rollback();
+                return false;
             }
-            return false;
-            //throw new SQLException(e);
-        } finally {
-            if(connection != null) {
-                connection.close();
-            }
-            if(prepareStatement != null) {
-                prepareStatement.close();
-            }
-            if (prepareStatementCross != null) {
-                prepareStatementCross.close();
-            }
+
+        } catch (SQLException e) {
+            throw new SQLException("Ошибка при удалении из базы данных", e);
         }
     }
 

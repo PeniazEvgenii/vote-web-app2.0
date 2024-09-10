@@ -77,42 +77,30 @@ public class ArtistStorageDB implements IStorage<Artist> {
         }
     }
 
+    @Override
     public boolean delete(Long id) throws SQLException {
-        Connection connection = null;
-        PreparedStatement prepareStatement = null;
-        PreparedStatement prepareStatementVote = null;
-
-        try {
-            connection = ConnectionManager.open();
-            prepareStatement = connection.prepareStatement(SQL_DELETE_ARTIST);
-            prepareStatementVote = connection.prepareStatement(SQL_UPDATE_ARTIST_IN_VOTE);
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement prepareStatementVote = connection.prepareStatement(SQL_UPDATE_ARTIST_IN_VOTE);
+             PreparedStatement prepareStatement = connection.prepareStatement(SQL_DELETE_ARTIST)) {
 
             connection.setAutoCommit(false);
 
-            prepareStatementVote.setLong(1, id);
-            prepareStatementVote.executeUpdate();
+            try {
+                prepareStatementVote.setLong(1, id);
+                prepareStatementVote.executeUpdate();
 
-            prepareStatement.setLong(1, id);
-            prepareStatement.executeUpdate();
+                prepareStatement.setLong(1, id);
+                prepareStatement.executeUpdate();
 
-            connection.commit();
-            return true;
-        } catch (Exception e) {
-            if(connection != null) {
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
                 connection.rollback();
+                return false;
             }
-            return false;
-            //throw new SQLException(e);
-        } finally {
-            if(connection != null) {
-                connection.close();
-            }
-            if(prepareStatement != null) {
-                prepareStatement.close();
-            }
-            if (prepareStatementVote != null) {
-                prepareStatementVote.close();
-            }
+
+        } catch (SQLException e) {
+            throw new SQLException("Ошибка при удалении из базы данных", e);
         }
     }
 
