@@ -52,9 +52,13 @@ public class ServiceGetData implements IServiceGetData {
         List<TextAndTimeVote> listTextTime = new ArrayList<>();
 
         for (VoteEntity vote : listVote) {
-            artistCount.merge(vote.getArtistId(), 1L, Long::sum);
+            if(vote.getArtistId() != 0) {                         //проверка на удаленные артисты
+                artistCount.merge(vote.getArtistId(), 1L, Long::sum);
+            }
             for (Long genre : vote.getGenresId()) {
-                genresCount.merge(genre, 1L, Long::sum);
+                if(genre != 0) {
+                    genresCount.merge(genre, 1L, Long::sum);
+                }
             }
             String info = vote.getInfo();
             LocalDateTime localDateTime = TimeUtil.convertOffsetToLocalDateTime(vote.getCreate_at(), TIME_ZONE);
@@ -79,8 +83,9 @@ public class ServiceGetData implements IServiceGetData {
         List<TextTimeString>  result = new ArrayList<>();
         for (TextAndTimeVote timeVote : textAndTimeVotes) {
             LocalDateTime time = timeVote.getTime();
-            TextTimeString textTimeString = new TextTimeString(timeVote.getTextInfo(),
-                                                               time.format(DateTimeFormatter.ofPattern(FORMAT_DATE)));
+            TextTimeString textTimeString = new TextTimeString(
+                                             timeVote.getTextInfo(),
+                                             time.format(DateTimeFormatter.ofPattern(FORMAT_DATE)));
 
             result.add(textTimeString);
         }

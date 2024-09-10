@@ -8,4 +8,6 @@ public interface IArtistService {
     String get(Long id);
 
     Map<Long, String> getAll();
+
+    boolean delete(Long id);
 }

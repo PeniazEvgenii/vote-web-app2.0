@@ -6,4 +6,6 @@ public interface IGenreService {
     Long create(String name);
     String get(Long id);
     Map<Long, String> getAll();
+
+    boolean delete(Long id);
 }

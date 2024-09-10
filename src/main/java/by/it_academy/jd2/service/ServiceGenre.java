@@ -4,6 +4,7 @@ import by.it_academy.jd2.entity.Genre;
 import by.it_academy.jd2.service.api.IGenreService;
 import by.it_academy.jd2.storage.api.IStorage;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,14 @@ public class ServiceGenre implements IGenreService {
     public Map<Long, String> getAll() {
         Map<Long, Genre> longStringMap = genreStorage.getAll();
         return longStringMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getName()));  //сохраняю старую структуру
+    }
+
+    public boolean delete(Long id) {
+        try {
+            return genreStorage.delete(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка при удалении из базы данных" ,e);
+        }
     }
 
 }
