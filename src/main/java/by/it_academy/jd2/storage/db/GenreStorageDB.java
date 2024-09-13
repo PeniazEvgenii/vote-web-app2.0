@@ -89,7 +89,8 @@ public class GenreStorageDB implements IStorage<Genre> {
 
                 connection.commit();
                 return true;
-            } catch (SQLException e) {
+            } catch (Exception e) {
+
                 connection.rollback();
                 return false;
             }

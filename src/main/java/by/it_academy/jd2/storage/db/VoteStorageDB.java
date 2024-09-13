@@ -158,7 +158,7 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
 
                 connection.commit();
                 return true;
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 connection.rollback();
                 return false;
             }

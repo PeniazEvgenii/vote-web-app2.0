@@ -94,7 +94,8 @@ public class ArtistStorageDB implements IStorage<Artist> {
 
                 connection.commit();
                 return true;
-            } catch (SQLException e) {
+            } catch (Exception e) {
+
                 connection.rollback();
                 return false;
             }
