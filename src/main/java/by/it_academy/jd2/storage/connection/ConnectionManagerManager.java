@@ -1,5 +1,7 @@
-package by.it_academy.jd2.util;
+package by.it_academy.jd2.storage.connection;
 
+import by.it_academy.jd2.storage.connection.api.IConnectionManager;
+import by.it_academy.jd2.util.PropertiesUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import javax.sql.DataSource;
@@ -7,7 +9,8 @@ import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public final class ConnectionManager {
+public class ConnectionManagerManager implements IConnectionManager {
+
     private static final String URL_KEY = "db.url";
     private static final String USERNAME_KEY = "db.username";
     private static final String PASSWORD_KEY = "db.password";
@@ -16,9 +19,11 @@ public final class ConnectionManager {
     private static final String envConfigUsername = System.getenv("DATABASE_USERNAME");
     private static final String envConfigPassword = System.getenv("DATABASE_PASSWORD");
 
-    private static DataSource dataSource;
+    private DataSource dataSource;
 
-    static {
+    public ConnectionManagerManager(){}
+
+     {
         load();
     }
 
@@ -27,7 +32,7 @@ public final class ConnectionManager {
      * из файла /resources/application.properties. Для изменения параметров воспользуйтесь
      * переменными среды DATABASE_URL, DATABASE_USERNAME, DATABASE_PASSWORD.
      */
-    private static void load() {
+    private void load() {
         ComboPooledDataSource cpds = new ComboPooledDataSource();
 
         try {
@@ -41,10 +46,9 @@ public final class ConnectionManager {
         cpds.setPassword(getPassword());
 
         dataSource = cpds;
-
     }
 
-    public static Connection open() {
+    public Connection open() {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
@@ -52,20 +56,19 @@ public final class ConnectionManager {
         }
     }
 
-    private static String getUrl() {
+    private String getUrl() {
         return isValidEnvVariables() ? envConfigUrl : PropertiesUtil.get(URL_KEY);
     }
 
-    private static String getUsername() {
+    private String getUsername() {
         return isValidEnvVariables() ? envConfigUsername : PropertiesUtil.get(USERNAME_KEY);
     }
 
-    private static String getPassword() {
+    private String getPassword() {
         return isValidEnvVariables() ? envConfigPassword : PropertiesUtil.get(PASSWORD_KEY);
     }
 
-    private static boolean isValidEnvVariables() {
+    private boolean isValidEnvVariables() {
         return envConfigUrl != null && envConfigUsername != null && envConfigPassword != null;
     }
-
 }
