@@ -5,6 +5,7 @@ import by.it_academy.jd2.service.api.IGenreService;
 import by.it_academy.jd2.storage.api.IStorage;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -17,8 +18,10 @@ public class ServiceGenre implements IGenreService {
 
     @Override
     public Long create(String name) {
-        Genre genre = new Genre(name);
-        return genreStorage.create(genre);
+        if(name.isBlank()) {
+            throw new IllegalArgumentException();
+        }
+        return genreStorage.create(new Genre(name));
     }
 
     @Override
@@ -30,15 +33,15 @@ public class ServiceGenre implements IGenreService {
     @Override
     public Map<Long, String> getAll() {
         Map<Long, Genre> longStringMap = genreStorage.getAll();
-        return longStringMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getName()));  //сохраняю старую структуру
+        return longStringMap
+                .entrySet().stream()
+                .collect(Collectors
+                        .toMap(Map.Entry::getKey, e -> e.getValue().getName()));
     }
 
-    public boolean delete(Long id) {
-        try {
-            return genreStorage.delete(id);
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при удалении из базы данных" ,e);
-        }
+    @Override
+    public boolean delete(String deleteGenre) {
+            return genreStorage.delete(Long.valueOf(deleteGenre));
     }
 
 }

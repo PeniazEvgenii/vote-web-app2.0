@@ -4,7 +4,6 @@ import by.it_academy.jd2.entity.Artist;
 import by.it_academy.jd2.service.api.IArtistService;
 import by.it_academy.jd2.storage.api.IStorage;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,8 +17,10 @@ public class ServiceArtist implements IArtistService {
 
     @Override
     public Long create(String name) {
-        Artist artist = new Artist(name);
-        return artistStorage.create(artist);
+        if (name.isBlank()) {
+            throw new IllegalArgumentException();
+        }
+        return artistStorage.create(new Artist(name));
 
     }
 
@@ -37,11 +38,9 @@ public class ServiceArtist implements IArtistService {
     }
 
     @Override
-    public boolean delete(Long id) {
-        try {
-            return artistStorage.delete(id);
-        } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при удалении из базы данных" ,e);
-        }
+    public boolean delete(String deleteArtist) {
+
+        return artistStorage.delete(Long.valueOf(deleteArtist));
+
     }
 }

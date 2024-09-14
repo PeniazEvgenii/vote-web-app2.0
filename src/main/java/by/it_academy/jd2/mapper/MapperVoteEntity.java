@@ -26,7 +26,7 @@ public class MapperVoteEntity implements IMapperDtoToEntity {
                 .setArtist(Long.valueOf(infoFromUserDTO.getSinger()))
                 .setGenres(Arrays.stream(infoFromUserDTO.getJanres()).map(Long::valueOf).collect(Collectors.toList()))
                 .setInfo(infoFromUserDTO.getInfo())
-                .setCreate_at(OffsetDateTime.of(infoFromUserDTO.getDateTime(), ZoneOffset.of(OFFSET_BEL)))
+                .setCreateAt(OffsetDateTime.of(infoFromUserDTO.getDateTime(), ZoneOffset.of(OFFSET_BEL)))
                 .build();
     }
 

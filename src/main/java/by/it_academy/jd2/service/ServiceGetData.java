@@ -19,7 +19,7 @@ import java.util.Map;
 public class ServiceGetData implements IServiceGetData {
     private final IStorage<VoteEntity> voteStorage;
 
-    private static final String FORMAT_DATE = "HH:mm:ss _ dd.MM.yyyy";
+    private static final String FORMAT_DATE = "HH:mm:ss  dd.MM.yyyy";
     private static final String TIME_ZONE = "Europe/Minsk";
 
     public ServiceGetData(IStorage<VoteEntity> voteStorage){
@@ -52,7 +52,7 @@ public class ServiceGetData implements IServiceGetData {
         List<TextAndTimeVote> listTextTime = new ArrayList<>();
 
         for (VoteEntity vote : listVote) {
-            if(vote.getArtistId() != 0) {                         //проверка на удаленные артисты
+            if(vote.getArtistId() != 0) {
                 artistCount.merge(vote.getArtistId(), 1L, Long::sum);
             }
             for (Long genre : vote.getGenresId()) {
@@ -61,7 +61,7 @@ public class ServiceGetData implements IServiceGetData {
                 }
             }
             String info = vote.getInfo();
-            LocalDateTime localDateTime = TimeUtil.convertOffsetToLocalDateTime(vote.getCreate_at(), TIME_ZONE);
+            LocalDateTime localDateTime = TimeUtil.convertOffsetToLocalDateTime(vote.getCreateAt(), TIME_ZONE);
             listTextTime.add(new TextAndTimeVote(info, localDateTime));
         }
 

@@ -7,5 +7,5 @@ public interface IGenreService {
     String get(Long id);
     Map<Long, String> getAll();
 
-    boolean delete(Long id);
+    boolean delete(String id);
 }

@@ -9,5 +9,5 @@ public interface IArtistService {
 
     Map<Long, String> getAll();
 
-    boolean delete(Long id);
+    boolean delete(String deleteArtist);
 }
