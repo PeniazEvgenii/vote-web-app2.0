@@ -1,8 +1,8 @@
 package by.it_academy.jd2.entity;
 
 public class Artist {
-    Long id;
-    String name;
+    private Long id;
+    private String name;
 
     public Artist(Long id, String name) {
         this.id = id;

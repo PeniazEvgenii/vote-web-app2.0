@@ -1,6 +1,5 @@
 package by.it_academy.jd2.entity;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -9,13 +8,13 @@ public class VoteEntity {
     private List<Long> genresId;
     private final Long artistId;
     private final String info;
-    private final OffsetDateTime create_at;
+    private final OffsetDateTime createAt;
 
-    private VoteEntity(List<Long> genresId, Long artistId, String info, OffsetDateTime create_at, Long id ) {
+    private VoteEntity(List<Long> genresId, Long artistId, String info, OffsetDateTime createAt, Long id ) {
         this.genresId = genresId;
         this.artistId = artistId;
         this.info = info;
-        this.create_at = create_at;
+        this.createAt = createAt;
         this.id = id;
     }
 
@@ -43,8 +42,8 @@ public class VoteEntity {
         return info;
     }
 
-    public OffsetDateTime getCreate_at() {
-        return create_at;
+    public OffsetDateTime getCreateAt() {
+        return createAt;
     }
 
     public Long getId() {
@@ -56,7 +55,7 @@ public class VoteEntity {
         private List<Long> genresId;
         private Long artistId;
         private String info;
-        private OffsetDateTime create_at;
+        private OffsetDateTime createAt;
 
         private VoteEntityBuilder() {
         }
@@ -81,13 +80,13 @@ public class VoteEntity {
             return this;
         }
 
-        public VoteEntityBuilder setCreate_at(OffsetDateTime create_at) {
-            this.create_at = create_at;
+        public VoteEntityBuilder setCreateAt(OffsetDateTime createAt) {
+            this.createAt = createAt;
             return this;
         }
 
         public VoteEntity build() {
-            return new VoteEntity(genresId, artistId, info, create_at, id);
+            return new VoteEntity(genresId, artistId, info, createAt, id);
         }
     }
 }
