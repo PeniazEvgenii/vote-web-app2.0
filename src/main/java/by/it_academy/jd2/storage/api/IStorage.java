@@ -11,5 +11,5 @@ public interface IStorage<T> {
 
     Map<Long, T> getAll();
 
-    boolean delete(Long id) throws SQLException;
+    boolean delete(Long id);
 }

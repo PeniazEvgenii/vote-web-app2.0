@@ -2,7 +2,7 @@ package by.it_academy.jd2.storage.db;
 
 import by.it_academy.jd2.entity.VoteEntity;
 import by.it_academy.jd2.storage.api.IStorage;
-import by.it_academy.jd2.util.ConnectionManager;
+import by.it_academy.jd2.storage.connection.api.IConnectionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class VoteStorageDB implements IStorage<VoteEntity> {
+    private final IConnectionManager connectionManager;
 
     private static final String INSERT_VOTE_SQL = "INSERT INTO app.vote (artist_id, about, create_at) VALUES (?, ?, ?) returning id";
     private static final String INSERT_VOTE_GENRE_SQL = "INSERT INTO app.cross_vote_genre (vote_id, genre_id) VALUES (?, ?)";
@@ -24,31 +25,39 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
     private static final String SQL_DELETE_VOTE = "DELETE FROM app.vote WHERE id = ?";
     private static final String SQL_DELETE_VOTE_IN_CROSS = "DELETE FROM app.cross_vote_genre WHERE vote_id = ?";
 
-    public VoteStorageDB() {
+    public VoteStorageDB(IConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
 
     @Override
     public Long create(VoteEntity voteEntity) {
-        try (Connection connection = ConnectionManager.open();
+        try (Connection connection = connectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_VOTE_SQL);
-             PreparedStatement preparedStatement2 = connection.prepareStatement(INSERT_VOTE_GENRE_SQL)) {
+             PreparedStatement preparedStatementCross = connection.prepareStatement(INSERT_VOTE_GENRE_SQL)) {
 
-            preparedStatement.setLong(1, voteEntity.getArtistId());
-            preparedStatement.setString(2, voteEntity.getInfo());
-            preparedStatement.setObject(3, voteEntity.getCreate_at());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
+            connection.setAutoCommit(false);
             Long vote_id = null;
+            try {
+                preparedStatement.setLong(1, voteEntity.getArtistId());
+                preparedStatement.setString(2, voteEntity.getInfo());
+                preparedStatement.setObject(3, voteEntity.getCreateAt());
 
-            while (resultSet.next()) {
-                vote_id = resultSet.getLong("id");
-            }
+                ResultSet resultSet = preparedStatement.executeQuery();
 
-            List<Long> genresId = voteEntity.getGenresId();
-            for (Long genreId : genresId) {
-                preparedStatement2.setLong(1, vote_id);
-                preparedStatement2.setLong(2, genreId);
-                preparedStatement2.executeUpdate();
+                while (resultSet.next()) {
+                    vote_id = resultSet.getLong("id");
+                }
+
+                List<Long> genresId = voteEntity.getGenresId();
+                for (Long genreId : genresId) {
+                    preparedStatementCross.setLong(1, vote_id);
+                    preparedStatementCross.setLong(2, genreId);
+                    preparedStatementCross.executeUpdate();
+                }
+                connection.commit();
+                return vote_id;
+            } catch (Exception e) {
+                connection.rollback();
             }
 
             return vote_id;
@@ -59,7 +68,7 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
 
     @Override
     public VoteEntity get(Long id) {
-        try (Connection connection = ConnectionManager.open();
+        try (Connection connection = connectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_VOTE_BY_ID_SQL)) {
 
             preparedStatement.setLong(1, id);
@@ -77,21 +86,21 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
             return voteEntity;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка при получении голоса", e);
         }
     }
 
-    public List<Long> getGenresByVote(Long vote_id) {
-        try (Connection connection = ConnectionManager.open()) {
-            return getGenresByVote(vote_id, connection);
+    public List<Long> getGenresByVote(Long voteId) {
+        try (Connection connection = connectionManager.open()) {
+            return getGenresByVote(voteId, connection);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<Long> getGenresByVote(Long vote_id, Connection connection) {
+    public List<Long> getGenresByVote(Long voteId, Connection connection) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(SELECT_GENRE_BY_VOTE_ID)) {
-            preparedStatement.setLong(1, vote_id);
+            preparedStatement.setLong(1, voteId);
             ResultSet resultSet2 = preparedStatement.executeQuery();
             return getListGenres(resultSet2);
         } catch (SQLException e) {
@@ -101,7 +110,7 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
 
     @Override
     public Map<Long, VoteEntity> getAll() {
-        try (Connection connection = ConnectionManager.open();
+        try (Connection connection = connectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_VOTE_SQL)
         ) {
 
@@ -120,7 +129,7 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
             return mapVotes;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка при получении голосов", e);
         }
     }
 
@@ -137,13 +146,13 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
                 .setId(resultSet.getLong("id"))
                 .setArtist(resultSet.getLong("artist_id"))
                 .setInfo(resultSet.getString("about"))
-                .setCreate_at(resultSet.getObject("create_at", OffsetDateTime.class))
+                .setCreateAt(resultSet.getObject("create_at", OffsetDateTime.class))
                 .build();
     }
 
     @Override
-    public boolean delete(Long id) throws SQLException {
-        try (Connection connection = ConnectionManager.open();
+    public boolean delete(Long id) {
+        try (Connection connection = connectionManager.open();
              PreparedStatement prepareStatement = connection.prepareStatement(SQL_DELETE_VOTE);
              PreparedStatement prepareStatementCross = connection.prepareStatement(SQL_DELETE_VOTE_IN_CROSS)
         ) {
@@ -164,7 +173,7 @@ public class VoteStorageDB implements IStorage<VoteEntity> {
             }
 
         } catch (SQLException e) {
-            throw new SQLException("Ошибка при удалении из базы данных", e);
+            throw new RuntimeException("Ошибка при удалении голоса", e);
         }
     }
 

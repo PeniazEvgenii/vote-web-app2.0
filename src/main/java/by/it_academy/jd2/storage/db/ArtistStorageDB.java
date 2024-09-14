@@ -2,7 +2,7 @@ package by.it_academy.jd2.storage.db;
 
 import by.it_academy.jd2.entity.Artist;
 import by.it_academy.jd2.storage.api.IStorage;
-import by.it_academy.jd2.util.ConnectionManager;
+import by.it_academy.jd2.storage.connection.api.IConnectionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +13,8 @@ import java.util.Map;
 
 public class ArtistStorageDB implements IStorage<Artist> {
 
+    private final IConnectionManager connectionManager;
+
     private static final String SQL_INSERT_ARTIST = "INSERT INTO app.artist (name) VALUES (?) returning id";
     private static final String SQL_GET_ARTIST = "SELECT name FROM app.artist WHERE id = ?";
     private static final String SQL_GET_ALL_ARTIST = "SELECT id, name FROM app.artist";
@@ -21,12 +23,13 @@ public class ArtistStorageDB implements IStorage<Artist> {
     private static final String SQL_UPDATE_ARTIST_IN_VOTE = "UPDATE app.vote SET artist_id = null WHERE artist_id = ?";
 
 
-    public ArtistStorageDB() {
+    public ArtistStorageDB(IConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
 
     @Override
     public Long create(Artist artist) {
-        try (Connection connection = ConnectionManager.open();
+        try (Connection connection = connectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_INSERT_ARTIST)) {
             preparedStatement.setString(1, artist.getName());
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -36,13 +39,13 @@ public class ArtistStorageDB implements IStorage<Artist> {
             }
             return id;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка при создании исполнителя", e);
         }
     }
 
     @Override
     public Artist get(Long id) {
-        try (Connection connection = ConnectionManager.open();
+        try (Connection connection = connectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_GET_ARTIST)) {
             preparedStatement.setLong(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -55,13 +58,13 @@ public class ArtistStorageDB implements IStorage<Artist> {
             return artist;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка при получении исполнителя", e);
         }
     }
 
     @Override
     public Map<Long, Artist> getAll() {
-        try (Connection connection = ConnectionManager.open();
+        try (Connection connection = connectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_GET_ALL_ARTIST);
         ) {
             Map<Long, Artist> result = new HashMap<>();
@@ -73,13 +76,13 @@ public class ArtistStorageDB implements IStorage<Artist> {
             }
             return result;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка при получении исполнителей",e);
         }
     }
 
     @Override
-    public boolean delete(Long id) throws SQLException {
-        try (Connection connection = ConnectionManager.open();
+    public boolean delete(Long id) {
+        try (Connection connection = connectionManager.open();
              PreparedStatement prepareStatementVote = connection.prepareStatement(SQL_UPDATE_ARTIST_IN_VOTE);
              PreparedStatement prepareStatement = connection.prepareStatement(SQL_DELETE_ARTIST)) {
 
@@ -101,7 +104,7 @@ public class ArtistStorageDB implements IStorage<Artist> {
             }
 
         } catch (SQLException e) {
-            throw new SQLException("Ошибка при удалении из базы данных", e);
+            throw new RuntimeException("Ошибка при удалении из базы данных", e);
         }
     }
 
