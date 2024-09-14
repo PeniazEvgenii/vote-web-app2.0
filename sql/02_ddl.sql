@@ -16,8 +16,8 @@ CREATE TABLE app.cross_vote_genre
 (
   vote_id BIGINT,
   genre_id BIGINT,
-  FOREIGN KEY (vote_id) REFERENCES app.vote (id),
-  FOREIGN KEY (genre_id) REFERENCES app.genre (id),
+  CONSTRAINT fk_vote FOREIGN KEY (vote_id) REFERENCES app.vote (id),
+  CONSTRAINT fk_genre FOREIGN KEY (genre_id) REFERENCES app.genre (id),
   UNIQUE (vote_id, genre_id)
 );
 
