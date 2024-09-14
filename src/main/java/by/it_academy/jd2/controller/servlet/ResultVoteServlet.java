@@ -30,20 +30,20 @@ public class ResultVoteServlet extends HttpServlet {
     public static final String ATTRIBUTE_MAP_GENRES = "test2";
     public static final String JSP_PAGE_WITH_RESULT = "resultVote";
 
-    IServiceGetData serviceGetData = ServiceGetDataFactory.getInstance();
-    IArtistService singerService = ServiceArtistFactory.getInstance();
-    IGenreService genreService = ServiceGenreFactory.getInstance();
+    private final IServiceGetData serviceGetData = ServiceGetDataFactory.getInstance();
+    private final IArtistService singerService = ServiceArtistFactory.getInstance();
+    private final IGenreService genreService = ServiceGenreFactory.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SortedDateDTO sortedDateDTO = serviceGetData.getData();
         List<TextTimeString> textAndTimeVotes = sortedDateDTO.getTextAndTimeVotes();
-        List<Map.Entry<Long, Long>> sortSing = sortedDateDTO.getSortSing();
-        List<Map.Entry<Long, Long>> sortGenre = sortedDateDTO.getSortJanr();
+        Map<Long, Long> sortArtist = sortedDateDTO.getSortSing();
+        Map<Long, Long> sortGenre = sortedDateDTO.getSortJanr();
 
         req.setAttribute(ATTRIBUTE_MAP_SINGERS, singerService.getAll());
         req.setAttribute(ATTRIBUTE_MAP_GENRES, genreService.getAll());
-        req.setAttribute(ATTRIBUTE_SINGER_SORT, sortSing);
+        req.setAttribute(ATTRIBUTE_SINGER_SORT, sortArtist);
         req.setAttribute(ATTRIBUTE_GENRE_SORT, sortGenre);
         req.setAttribute(ATTRIBUTE_TEXT_SORT, textAndTimeVotes);
 

@@ -60,10 +60,6 @@ public class FormForVoteServlet extends HttpServlet {
         } catch (ValidFormException validationException) {
             req.setAttribute(ATTRIBUTE_REQUEST_VOTE_ERRORS, validationException.getErrors());
             doGet(req, resp);
-        } catch (IllegalArgumentException e) {
-            try (PrintWriter writer = resp.getWriter()) {
-                writer.write("<p>error: " + e.getMessage() + "</p>");
-            }
         }
 
     }

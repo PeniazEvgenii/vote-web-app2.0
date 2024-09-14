@@ -46,28 +46,26 @@ public class ArtistServlet extends HttpServlet {
             addingArtist(req, artist);
         }
 
-        deletionArtist(req, deleteArtist);
+        if (deleteArtist != null) {
+            deletionArtist(req, deleteArtist);
+        }
+
         doGet(req, resp);
     }
 
     private void addingArtist(HttpServletRequest req, String artist) {
         try {
-            if (artist.isBlank()) {
-                throw new IllegalArgumentException(ERROR_ARTIST_NAME);
-            }
             Long id = artistService.create(artist);
             req.setAttribute(ATTRIBUTE_ADD_ARTIST, MESSAGE_ARTIST_ADDED + id);
-
         } catch (IllegalArgumentException e) {
-            req.setAttribute(ATTRIBUTE_ERROR_ARTIST, MESSAGE_ARTIST_NOT_ADDED + ". " + e.getMessage());
+            req.setAttribute(ATTRIBUTE_ERROR_ARTIST, MESSAGE_ARTIST_NOT_ADDED);
         }
     }
 
     private static void deletionArtist(HttpServletRequest req, String deleteArtist) {
         if(deleteArtist != null) {
             try {
-                boolean delete = artistService.delete(Long.valueOf(deleteArtist));
-                if(delete) {
+                if(artistService.delete(deleteArtist)) {
                     req.setAttribute(PARAMETER_DELETE_ARTIST, MESSAGE_ARTIST_DELETED);
                 } else {
                     req.setAttribute(PARAMETER_DELETE_ARTIST_ERROR, MESSAGE_ARTIST_NOT_DELETED);

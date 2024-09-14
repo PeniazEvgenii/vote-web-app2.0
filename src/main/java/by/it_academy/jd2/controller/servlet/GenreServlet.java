@@ -29,7 +29,7 @@ public class GenreServlet extends HttpServlet {
     public static final String ATTRIBUTE_ADD_GENRE = "janreAdd";
     public static final String JSP_NAME_GENRE = "janre";
 
-    IGenreService genreService = ServiceGenreFactory.getInstance();
+    private final IGenreService genreService = ServiceGenreFactory.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -57,30 +57,24 @@ public class GenreServlet extends HttpServlet {
 
     private void addingGenre(HttpServletRequest req, String genre) {
         try {
-            if(genre.isBlank()) {
-                throw new IllegalArgumentException(ERROR_GENRE_NAME);
-            }
-
             Long id = genreService.create(genre);
             req.setAttribute(ATTRIBUTE_ADD_GENRE, MESSAGE_GENRE_ADDED + id);
 
         } catch (IllegalArgumentException e) {
-            req.setAttribute(ATTRIBUTE_ERROR_GENRE, MESSAGE_GENRE_NOT_ADDED + e.getMessage());
+            req.setAttribute(ATTRIBUTE_ERROR_GENRE, MESSAGE_GENRE_NOT_ADDED);
         }
     }
 
     private void deletionGenre(HttpServletRequest req, String deleteGenre) {
         try {
-            boolean delete = genreService.delete(Long.valueOf(deleteGenre));
-
-            if (delete) {
+            if (genreService.delete(deleteGenre)) {
                 req.setAttribute(PARAMETER_DELETE_GENRE, MESSAGE_GENRE_DELETED);
             } else {
                 req.setAttribute(PARAMETER_DELETE_GENRE_ERROR, MESSAGE_GENRE_NOT_DELETED);
             }
 
         } catch (RuntimeException e) {
-            req.setAttribute(PARAMETER_DELETE_GENRE_ERROR, MESSAGE_GENRE_NOT_DELETED + " " + e.getMessage());
+            req.setAttribute(PARAMETER_DELETE_GENRE_ERROR, MESSAGE_GENRE_NOT_DELETED);
         }
     }
 }
