@@ -9,19 +9,19 @@ import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class ConnectionManagerManager implements IConnectionManager {
+public class ConnectionManager implements IConnectionManager {
 
     private static final String URL_KEY = "db.url";
     private static final String USERNAME_KEY = "db.username";
     private static final String PASSWORD_KEY = "db.password";
 
-    private static final String envConfigUrl = System.getenv("DATABASE_URL");
-    private static final String envConfigUsername = System.getenv("DATABASE_USERNAME");
-    private static final String envConfigPassword = System.getenv("DATABASE_PASSWORD");
+    private final String envConfigUrl = System.getenv("DATABASE_URL");
+    private final String envConfigUsername = System.getenv("DATABASE_USERNAME");
+    private final String envConfigPassword = System.getenv("DATABASE_PASSWORD");
 
     private DataSource dataSource;
 
-    public ConnectionManagerManager(){}
+    public ConnectionManager(){}
 
      {
         load();
